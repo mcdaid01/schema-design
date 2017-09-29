@@ -3,8 +3,8 @@ const Student = require('../models/student')
 const School = require('../models/school')
 
 // possibly would separate to a module
-const getSchool = async (schoolId,fields)=>{
-	const school = await School.findById(schoolId,fields)
+const getSchool = async (ObjId,fields)=>{
+	const school = await School.findById(ObjId,fields)
 
 	if (school===null)
 		throw (`${schoolId} not found!`)
@@ -12,16 +12,24 @@ const getSchool = async (schoolId,fields)=>{
 	return school
 }
 
-module.exports = {
-	greeting(req,res){
-		res.send({'hi':'there'})
-	},
+const getSchoolById = async (id,fields)=>{
+	const school = await School.findOne({id:id},fields)
 
+	if (school===null)
+		throw (`${schoolId} not found!`)
+	
+	return school
+}
+
+
+
+module.exports = {
+	
 	school(req,res,next){
 		const schoolId= req.params.id
 		
 		getSchool(schoolId)
-			.then( school=> school === null ? res.status(404).send(`${schoolId} not found`) : res.send(school) )
+			.then( school=> res.send(school) )
 			.catch(next)
 	},
 
@@ -29,13 +37,8 @@ module.exports = {
 		
 		const schoolId= req.params.id
 		try{
-			const school = await School.findById(schoolId)
-
-			if (school===null)
-				throw (`${schoolId} not found`) // probably better to throw an error
-			
+			const school = await getSchool(schoolId)
 			const students = await Student.find({ _id: { $in: school.students.map( ob => ob._id ) } })
-			
 			res.send(students)
 		}
 		catch(e){
@@ -43,18 +46,46 @@ module.exports = {
 		}
 	},
 
-	async student(req,res,next){
-		const [schoolId,studentId] = [req.params.schoolid,req.params.id]
+	async schoolId(req,res,next){
+		const {id} = req.params
+		
 
-		console.log(schoolId,studentId)
+		//console.log(schoolId,studentId)
+		const school = await getSchoolById(id) 
 
-		res.send(getSchool(schoolId),{students:1})
+		res.send(school)
 
 		//res.send({schoolId,studentId})
 	},
 
-	async seed(req,res,next){
-		const schools = await School.find({}).limit(2)
+	async student(req,res,next){
+		//console.log(req.body)
+		const {schoolId, id,password} = req.body
+		//	const driverProps= req.body
+		try{
+			// note not perfect, but it works. Possibly aggregat might be better way
+			
+			// can have more than one match, so could check password too
+			const student = await School.find({id:schoolId},
+				{_id:0, teachers:0, active:0, address:0, students:{$elemMatch:{id:id}  } })
+			
+			//const student = await School.find({id:schoolId},{'students.id':id}) // this doesn't work
+			
+			//console.log(JSON.stringify(student,null,2)) 
+			
+			res.send(student.pop().students.pop())
+		}
+		catch (e) {
+			console.log(e)
+			res.status(404).send(e)
+		}
+	},
+
+	async data(req,res,next){ 
+		const schools = await School.find({},{_id:1,id:1,teachers:1,students:1}).limit(2)
+
+		// this will probably do as can just pick off whats needed 
+		// also have info on how many are in the school completely
 		res.send(schools)
 	},
 	

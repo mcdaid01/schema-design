@@ -1,7 +1,31 @@
-/*const assert = require('assert')
+require('./test_helper') // so connection happens first
 const request = require('supertest')
 const mongoose = require('mongoose')
+const assert = require('assert')
 const app = require('../app')
+const seedTestDatabase = require('../seed/seed_school')
+
+console.log('student_controller_test')
+
+before(done =>{
+	console.log('seeding')
+	seedTestDatabase().then(()=>{
+		console.log('seeding done')
+		done()
+	})
+})
+
+// describe('will do some shit',()=>{
+
+// 	it('does some shit',done=>{
+// 		assert(true)
+// 		done()
+// 	})
+
+// })
+
+
+/*const assert = require('assert')
 
 const Driver = mongoose.model('driver') // note not require, mocha may have required it and the file gets run twice
 

@@ -26,11 +26,12 @@ const StudentSchema = new Schema({
 		type: String,
 		required:true
 	 },
-	 user:{
-		type: String,
-		required:true
-		// unique:true -- would need to be unique to a school only
-	 },
+	 // thinking now don't need this as would be looked up from list of students in school document
+	//	 id:{ // human readable
+	//		type: String,
+	//		required:true
+	//		// unique:true -- would need to be unique to a school only
+	//	 },
 	 groups:[] // so this would mean a teacher could get students in a particular class
 	 //,
 	// data:{

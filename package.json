@@ -18,5 +18,8 @@
     "mongoose": "^4.11.13",
     "path": "^0.12.7",
     "supertest": "^3.0.0"
+  },
+  "devDependencies": {
+    "livereload": "^0.6.2"
   }
 }

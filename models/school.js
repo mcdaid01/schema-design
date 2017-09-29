@@ -11,12 +11,20 @@ const accessSchema = new Schema({ // _id is used with the correct one for studen
 	password:{
 		type:String,
 		required:true
+	},
+	id:{ // human readable one
+		type:String,
+		required:true
 	}	
 })
 
 const SchoolSchema = new Schema({
 	name:{
 		type: String,
+		required:true
+	},
+	id:{ // country identifier+counter for country 
+		type:String,
 		required:true
 	},
 	address: {
@@ -41,5 +49,7 @@ const SchoolSchema = new Schema({
 })
 
 const School = mongoose.model('school', SchoolSchema)
+
+SchoolSchema.index({id: 1}, {unique: true})
 
 module.exports = School
