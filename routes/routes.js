@@ -19,7 +19,11 @@ module.exports = (app) => {
 	// get some useful data which I might use in testing or to set enviroment variables in postman
 	app.get('/api/data',StudentsController.data)
 
+	// get list of every school, teacher and student
+	app.get('/api/datalists',StudentsController.datalists)
 	
+
+
 	app.post('/api/student',StudentsController.student)
 	//app.put('/api/drivers/:id',DriversController.edit)
 	//app.delete('/api/drivers/:id',DriversController.delete)

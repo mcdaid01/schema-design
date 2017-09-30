@@ -48,6 +48,7 @@ class App {
 		const {password,id} = student1
 		
 		this.buildLink('GET /data','data','view the sample data')
+		this.buildLink('GET /datalists','datalists','view lists of schools teachers and students')
 		this.buildLink('GET /school/:id',`school/${data[0]._id}`,'get school based on its objectId')
 		this.buildLink('GET /students/:id',`students/${data[0]._id}`,'list students from a school based on school objectId')
 		this.buildLink('GET /schoolId/:id',`schoolid/${data[0].id}`,'get school from it schoolId ')

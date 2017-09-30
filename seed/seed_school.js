@@ -2,7 +2,7 @@ const [mongoose, faker, _] = [require('mongoose'), require('faker'), require('lo
 
 const [School, Teacher, Student] = [require('../models/school'), require('../models/teacher'), require('../models/student')]
 
-const [schoolMin, teacherMin, studentMin] = [2, 2, 6]
+
 
 const getPassword = ()=> faker.address.state().toLowerCase().split(' ').pop()
 
@@ -16,24 +16,12 @@ const dropCollections = async () => {
 	}
 }
 
-const addSchools = () => { // note alwats adds one so resolves promise
-	return School.count().then(count => Promise.all(_.times(schoolMin - count, () => createSchool())))
-}
+const addSchools = (total) => Promise.all(_.times(total, () => createSchool()))
 
-const addTeachers = async (schoolIds)=>{ // same as above just working out which is easier to read
-	const count = await Teacher.count()
-	await Promise.all(_.times(teacherMin-count, ()=> createTeacher(schoolIds)))
-	//return ''
-}
+const addTeachers = (schoolIds,total)=> Promise.all(_.times(total, ()=> createTeacher(schoolIds)))
 
-const addStudents = async (schoolIds)=>{
-	const count = await Student.count()
-	await Promise.all( _.times(studentMin-count, ()=> createStudent(schoolIds)))
+const addStudents = async (schoolIds,total)=> Promise.all( _.times(total, ()=> createStudent(schoolIds)))
 
-	//return 'anything' // seems the return was not important but have to await the creation process
-	// in someways the addSchools is cleaner and should remember if used babel on front end the generated
-	// code for the async can be horrendous
-}
 
 // want to be able to use the ids in assigning newly created teachers 
 const getSchoolIds = async ()=>{
@@ -103,13 +91,13 @@ const createStudent= async(schoolIds)=>{
 	})
 }
 
-const seed = async ()=>{
+const seedData = async (schools=3, teachers=15, students=30)=>{
 	await dropCollections()
-	await addSchools()
+	await addSchools(schools)
 	const schoolIds = await getSchoolIds()
-	await addTeachers(schoolIds)
+	await addTeachers(schoolIds,teachers)
 	console.log('teachers added')
-	await addStudents(schoolIds)
+	await addStudents(schoolIds,students)
 	console.log('students added')
 	return 'done'
 }
@@ -135,16 +123,15 @@ const listTeachers = async ()=>{
 	return teachers
 }
 
-//seed().then((res)=>console.log('seeded',res))
+//seedData().then((res)=>console.log('seeded',res))
 
 
-//seed().then(()=>console.log('done'))
+//seedData().then(()=>console.log('done'))
 
-//seed().then(()=>listStudents()).then( students=> console.log(students) )
+//seedData().then(()=>listStudents()).then( students=> console.log(students) )
 
-//seed().then(()=>listTeachers()).then( teachers=> console.log(teachers) )
+//seedData().then(()=>listTeachers()).then( teachers=> console.log(teachers) )
 
-module.exports = seed
-
+module.exports = seedData
 
 // may as well build the queries onto here, can then separate them out when done 

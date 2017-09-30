@@ -1,28 +1,144 @@
 require('./test_helper') // so connection happens first
+const _ = require('lodash')
 const request = require('supertest')
 const mongoose = require('mongoose')
 const assert = require('assert')
 const app = require('../app')
-const seedTestDatabase = require('../seed/seed_school')
+const seedTestData = require('../seed/seed_school')
+
+const [newSeed, schools, teachers, students] = [!true, 2, 4, 20]
 
 console.log('student_controller_test')
 
-before(done =>{
-	console.log('seeding')
-	seedTestDatabase().then(()=>{
+const seed=(done)=>{
+	seedTestData(schools,teachers,students).then(()=>{
 		console.log('seeding done')
 		done()
 	})
+}
+
+before(function(done){
+	this.timeout(4000)
+	console.log('newSeed',newSeed)
+	newSeed ? seed(done) : done()
 })
 
-// describe('will do some shit',()=>{
+describe('Fetch datalists check counts', ()=>{
+	it ('GET request to /api/datalists',done=>{
+		request(app)
+			.get('/api/datalists')
+			.end((err,res)=>{
+				
+				assert(res.statusCode === 200)
+				const body = res.body
+				console.log( body.schools.length,body.teachers.length,body.students.length )
+				assert(body.schools.length === schools)
+				assert(body.teachers.length === teachers)
+				assert(body.students.length === students)
+				
+				done()
+			})
+	})
+})
 
-// 	it('does some shit',done=>{
-// 		assert(true)
-// 		done()
-// 	})
+describe('Fetch data and use response to check further routes', ()=>{
 
-// })
+	let school_id, schoolId, student
+
+	it ('GET request to /api/data',done=>{
+		request(app)
+			.get('/api/data')
+			.end((err,res)=>{
+				
+				assert(res.statusCode === 200)
+				const body = res.body
+				school_id = body[0]._id
+				schoolId = body[0].id
+				
+				done()
+			})
+	})
+
+	it ('GET request to /api/school/:id',done=>{
+		request(app)
+			.get(`/api/school/${school_id}`)
+			.end((err,res)=>{
+				
+				assert(res.statusCode === 200)
+				//const body = res.body
+				//school_id = body[0]._id
+				//schoolid = body[0].id
+				
+				done()
+			})
+	})
+
+	it ('GET request to /api/schoolid/:id',done=>{
+		request(app)
+			.get(`/api/schoolid/${schoolId}`)
+			.end((err,res)=>{
+				
+				assert(res.statusCode === 200)
+				//const body = res.body
+				//school_id = body[0]._id
+				//schoolid = body[0].id
+
+				student = _.sample(res.body.students)
+				
+				console.log(student.id,student.password)
+				
+				done()
+			})
+	})
+
+	it ('GET request to /api/students/:id',done=>{
+		request(app)
+			.get(`/api/students/${school_id}`)
+			.end((err,res)=>{
+				
+				assert(res.statusCode === 200)
+				
+				
+				
+				done()
+			})
+	})
+
+	/*
+		this.buildLink('POST /student','student','get a user back based on schoolId studentId',
+			{'schoolId':data[1].id,id,password})
+
+	*/
+	
+	// eventually need a proper login route
+	it ('POST request correct login details to /api/student',done=>{
+		request(app)
+			.post('/api/student')
+			.send({id:student.id,password:student.password,schoolId})
+			.end((err,res)=>{
+				
+				assert(res.statusCode === 200)
+				assert(res.body._id ===student._id)
+				
+				done()
+			})
+	})
+
+	it ('POST request refuses with incorrect to /api/student',done=>{
+		request(app)
+			.post('/api/student')
+			.send({id:student.id,password:'bollocks',schoolId})
+			.end((err,res)=>{
+				
+				assert(res.statusCode === 401)
+				console.log(res.body)
+				assert(_.isEmpty(res.body))
+				
+				done()
+			})
+	})
+
+})
 
 
 /*const assert = require('assert')

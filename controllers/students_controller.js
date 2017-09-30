@@ -1,4 +1,6 @@
 // typical to have a file for each typr of of controller, so if had todos would have todo_controller and so on
+const _ = require('lodash')
+
 const Student = require('../models/student')
 const School = require('../models/school')
 
@@ -66,14 +68,17 @@ module.exports = {
 			// note not perfect, but it works. Possibly aggregat might be better way
 			
 			// can have more than one match, so could check password too
-			const student = await School.find({id:schoolId},
+			const result = await School.find({id:schoolId},
 				{_id:0, teachers:0, active:0, address:0, students:{$elemMatch:{id:id}  } })
 			
-			//const student = await School.find({id:schoolId},{'students.id':id}) // this doesn't work
+			const student = result.pop().students.pop()
+
+			console.log(student.password === password)
 			
-			//console.log(JSON.stringify(student,null,2)) 
+			// obviously would not send stuff back need to create a proper login route
+			student.password === password ? res.send(student) : res.status(401).send({}) 
 			
-			res.send(student.pop().students.pop())
+			
 		}
 		catch (e) {
 			console.log(e)
@@ -87,6 +92,25 @@ module.exports = {
 		// this will probably do as can just pick off whats needed 
 		// also have info on how many are in the school completely
 		res.send(schools)
+	},
+
+	async datalists(req,res,next){ 
+		
+		const schools = await School.find({},{_id:1,id:1,teachers:1})
+		const teachers = []
+		// teachers have to be taken off
+		schools.forEach(school=>{
+			school.teachers.forEach( teacher =>teachers.push(teacher) )
+			school.teachers=undefined 
+		})
+
+		const students = await Student.find({},{_id:1,name:1})
+
+		
+
+		// this will probably do as can just pick off whats needed 
+		// also have info on how many are in the school completely
+		res.send({schools,teachers,students})
 	},
 	
 	create(req,res,next){ // another convention is 'create' name
