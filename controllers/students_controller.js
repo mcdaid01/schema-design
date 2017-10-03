@@ -63,6 +63,7 @@ module.exports = {
 	async student(req,res,next){
 		//console.log(req.body)
 		const {schoolId, id,password} = req.body
+
 		//	const driverProps= req.body
 		try{
 			// note not perfect, but it works. Possibly aggregat might be better way
@@ -79,6 +80,51 @@ module.exports = {
 			student.password === password ? res.send(student) : res.status(401).send({}) 
 			
 			
+		}
+		catch (e) {
+			console.log(e)
+			res.status(404).send(e)
+		}
+	},
+
+	async pushStudents(req,res,next){
+		//console.log(req.body)
+		const {_id,students} = req.body
+		//	const driverProps= req.body
+		try{
+			console.log('*************')
+
+			const count = await School.count({_id})
+			
+			if (count===0)
+				throw new Error('school does not exits') 
+			
+			const userNames= students.map(student=>{
+				const [first,last] = student.name.split(' ')
+				return first.charAt(0)+last
+			} )
+
+			const dbStudents = await Student.create(students)
+
+			
+
+			const details = dbStudents.map( (student,index)=> { 
+				return  { _id: student._id, password: 'fags',id:userNames[index] } 
+			})
+			console.log('')
+			console.log('--------details----------')
+			console.log(details[0])
+
+			const results = await School.update({_id} , { 
+				$pushAll:{
+					students:details
+				}  
+			})
+			
+		//	console.log('results',results)
+			  
+			
+			res.status(200).send({})
 		}
 		catch (e) {
 			console.log(e)

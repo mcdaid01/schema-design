@@ -22,9 +22,16 @@ module.exports = (app) => {
 	// get list of every school, teacher and student
 	app.get('/api/datalists',StudentsController.datalists)
 	
-
-
+	// sort of mock login system 
 	app.post('/api/student',StudentsController.student)
+
+	// sort of mock login system 
+	app.post('/api/student',StudentsController.student)
+	
+	// add new students to a school
+	app.post('/api/students',StudentsController.pushStudents)
+	
+
 	//app.put('/api/drivers/:id',DriversController.edit)
 	//app.delete('/api/drivers/:id',DriversController.delete)
 	//app.get('/api/drivers',DriversController.index) 

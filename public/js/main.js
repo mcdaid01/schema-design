@@ -31,7 +31,7 @@ class App {
 				title 
 			}).html(desc).appendTo($li)
 
-		if (data)
+		const overide = ()=>{
 			$a.data(data).on('click',(evt)=>{
 				const $this = $(evt.target)
 				evt.preventDefault()
@@ -39,23 +39,32 @@ class App {
 					.then(data=> console.log(data))
 					.catch((e)=>console.log(e))
 			})
-		
+		}
+
+		data ? overide(data) : ''
 	}
 
 	buildList(data){
 		window.data=data
+		const school = data[0]
+
 		const student1 = data[1].students[0]
 		const {password,id} = student1
 		
 		this.buildLink('GET /data','data','view the sample data')
 		this.buildLink('GET /datalists','datalists','view lists of schools teachers and students')
-		this.buildLink('GET /school/:id',`school/${data[0]._id}`,'get school based on its objectId')
-		this.buildLink('GET /students/:id',`students/${data[0]._id}`,'list students from a school based on school objectId')
-		this.buildLink('GET /schoolId/:id',`schoolid/${data[0].id}`,'get school from it schoolId ')
+		this.buildLink('GET /school/:id',`school/${school._id}`,'get school based on its objectId')
+		this.buildLink('GET /students/:id',`students/${school._id}`,'list students from a school based on school objectId')
+		this.buildLink('GET /schoolId/:id',`schoolid/${school.id}`,'get school from it schoolId ')
 
 		// get working without password first, need user
-		this.buildLink('POST /student','student','get a user back based on schoolId studentId',
+		this.buildLink('POST /student','student','get a user back based on schoolId studentId. fake login!',
 			{'schoolId':data[1].id,id,password})
+
+		this.buildLink('POST /students','students','simulate adding student',{
+			_id:school._id, students : this.seedStudents()
+		})
+
 
 		// realise this one not making a lot of sense, would be better to do username,schoolId,password
 		// would be sent as json anyway, so just concentrate on routes that make sense
@@ -63,55 +72,23 @@ class App {
 		 
 	}
 
-	updateSchools(schools){
-		console.log(JSON.stringify(schools,null,2))
-		const $select=$('#schools').empty()
-
-		schools.forEach(school=>{
-			console.log(school)
-			$('<option>').val(school._id).html(school.name).appendTo($select)
-
-		})
-	}
-
-	seedDatabase() {
-		$.post(this.url + '/seed_database', data => this.updateSchools(data))
-	}
-
-	postSchools() {
-		$.post(this.url + '/schools', data => this.updateSchools(data) )
-	}
-
-	postSchoolsId(){
-		const id = $('#schools').val()
-		console.log(id)
-		$.post(`${this.url}/schools/${id}`, data => console.log(JSON.stringify(data,null,2)))
-	}
-
-	addListeners() {
-
-		console.log('addListeners', $)
-		$('li').on('click', 'a', (evt) => {
-
-			console.log('did it',this===app)
+	seedStudents(total = 3){
 		
-			const id = evt.target.id
-
-			const overide = id => {
-				evt.preventDefault()
-				
-				console.log('overide', id)
-
-				this[id]()
+		const createStudent= ()=>{
+			const [first,last]=[faker.name.firstName(),faker.name.lastName()]
+			// const schoolId =  _.sample(schoolIds)
+			// const id =  first.charAt(0)+last // might be done on the server
+			
+			return {
+				name : `${first} ${last}`
 			}
-
-			id ? overide(id) : ''
-
-		})
+		}
+		
+		return _.times(total,()=>createStudent()) 
 	}
 }
 
 console.log($)
 
 const app = new App('http://localhost:3050')
-app.addListeners()
+//app.addListeners()

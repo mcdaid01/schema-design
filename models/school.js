@@ -7,12 +7,12 @@ const Schema = mongoose.Schema
 // 	type: { type: String, default: 'Point' }
 // })
 
-const accessSchema = new Schema({ // _id is used with the correct one for student
+const AccessSchema = new Schema({ // _id is used with the correct one for student
 	password:{
 		type:String,
 		required:true
 	},
-	id:{ // human readable one
+	id:{ // human readable one, MAYCHANGE originally was id but when saving had odd results going to avoid using that name
 		type:String,
 		required:true
 	}	
@@ -40,10 +40,10 @@ const SchoolSchema = new Schema({
 		default: false
 	},
 	students:{ // embedded document, so to login would get the students _id from this collection, then fetch student
-		type:[accessSchema]
+		type:[AccessSchema]
 	},
 	teachers:{
-		type:[accessSchema]
+		type:[AccessSchema]
 	}
 
 })
