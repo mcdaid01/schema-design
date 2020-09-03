@@ -1,7 +1,7 @@
 {
   "name": "schema-design",
   "version": "1.0.0",
-  "description": "Another place to experiment on the what the final schema will look like",
+  "description": "Another place to experiment on the what the final schema will look like.",
   "main": "index.js",
   "scripts": {
     "start": "nodemon index.js",
